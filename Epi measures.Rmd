@@ -32,7 +32,7 @@ library(epitools)
 
 ### 1. One sample T tests in R
 
-One sample Z and T test are used for determining whether the mean in a population is different than a hypothesized value
+One sample Z and T tests are used for determining whether the mean in a population is different than a hypothesized value
 
 Assumptions for Z and T tests
 
