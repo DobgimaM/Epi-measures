@@ -1,0 +1,176 @@
+---
+html_document:
+  code_folding: hide
+  number_sections: yes
+  self_contained: yes
+  toc: yes
+  toc_float: yes
+author: "Dobgima Mofor"
+date: "2024-01-11"
+pdf_document:
+  toc: yes
+title: "Epi measures"
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+
+```{r}
+library(readr) # Import Excel files
+library(tidyverse) #Data manipulation
+library(epitools)
+```
+
+
+## I. Basic statistical test in R
+
+### 1. One sample T tests in R
+
+One sample Z and T test are used for determining whether the mean in a population is different than a hypothesized value
+
+Assumptions for Z and T tests
+
+Large sample size or data are approximately normal if sample size is small
+
+Assumptions for Z test
+
+Population standard deviation is known
+
+
+_Example_
+Is average gestational age in the population different than 39 weeks (use alpha = 0.05)
+
+- Null hypothesis H0 : mu = 39
+- Alternative hypothesis H1: mu != 39
+
+```{r}
+vlbw <- read_csv('vlbw.csv')
+
+vlbw <- vlbw[complete.cases(vlbw), c('bwt', 'gest', 'sex', 'twn', 'pneumo')]
+
+attach(vlbw)
+```
+
+
+```{r}
+a <- hist(vlbw$gest, xlab = 'Gestational age', main = 'Histogram gestational age')
+
+b <- ggplot(vlbw, aes(gest)) +
+  geom_histogram(col = 1, fill = 2, bins = 10) +
+  theme_classic()
+a
+b
+#library(ggpubr)
+#ggarrange(a,b)
+```
+
+Perform a t-test for
+H0: mu = 39
+H1: mu != 39
+at alpha = 0.05
+
+```{r}
+t_age <- t.test(vlbw$gest, mu = 39)
+names(t_age)
+```
+
+### 2. Two sample t-tests
+
+Unpaired two sample t-tests
+
+Recall that a two sample t-test tests the hypothesis that the means in two populations are the same
+
+i.e Whether the means of a continuous variable differ between two groups:
+
+Null hypothesis H0: mu1 = mu2
+Alternative hypothesis H1: mu1 != mu2
+
+
+_Example_
+Does mean gestational age differ between male and female infants?
+
+```{r}
+age_female <- vlbw %>% filter(sex == 'female') %>% select(gest)
+
+age_male <- vlbw %>% filter(sex == 'male') %>% select(gest)
+
+t_age_sex <- t.test(age_male, age_female)
+t_age_sex$p.value
+```
+p < 0.05 i.e there is no significant difference between male and female age
+
+- Difference in means > 0
+
+```{r}
+t.test(age_male, age_female, alternative = 'less')
+```
+
+### 3. Chi-squared test
+
+Are two categorical variables independent?
+
+Hypothesis:
+
+Null hypothesis: Sex is independent of being a twin
+Alternative hypothesis: Sex is not independent of being a twin
+
+Assumptions:
+
+- If 2x2 table, no cell counts < 5
+- If rxc table, no more than 20% cells < 5
+
+```{r}
+chisq.test(sex, twn)
+```
+
+# II. Epi measures
+# 1. Relative risk (RR) and Odds ratio (OR)
+
+
+- Ratio of risks: p1/p2
+-Is the risk of disease the same in the exposed and unexposed groups?
+- Often interested in testing H0 : RR = 1 vs. H1 : RR != 1
+- Can only be calculated in prospective studies
+
+```{r}
+table_pneumo <- table(pneumo,twn)
+
+epi_pneumo <- epitab(table_pneumo, method = 'riskratio')
+epi_pneumo$tab
+```
+
+- Ratio of odds
+- Is the odds of disease the same in the exposed and unexposed groups?
+- Odds is NOT the same as risk
+- Odds: p/(1-p) or p/q
+- OR = (p/1-p)) / (p2/(1-p2)) = (p1/q1)/ (p2/q2)
+- Often interested in testing H0: OR = 1 vs H1: OR != 1
+- Useful in retrospective studies
+
+```{r}
+epi_odds <- epitab(table_pneumo, method = 'oddsratio')
+epi_odds$tab[,c('oddsratio', 'lower', 'upper')]
+```
+## 2. Sample size calculations
+## 3. Power
+
+Power is the ability to detect a difference if one exists
+
+How many observations would we need to test whether two means are different if
+
+- The difference in means is 0.1
+- The standard deviation is 1
+- We want 90% power
+
+For t tests
+
+```{r}
+power.t.test(delta = 0.1, power = 0.9, type = 'two.sample', alternative = 'two.sided')
+```
+
