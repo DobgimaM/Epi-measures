@@ -42,7 +42,6 @@ Assumptions for Z test
 
 Population standard deviation is known
 
-
 _Example_
 Is average gestational age in the population different than 39 weeks (use alpha = 0.05)
 
