@@ -172,4 +172,3 @@ For t tests
 ```{r}
 power.t.test(delta = 0.1, power = 0.9, type = 'two.sample', alternative = 'two.sided')
 ```
-
