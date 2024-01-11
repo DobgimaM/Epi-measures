@@ -34,7 +34,7 @@ library(epitools)
 
 One sample Z and T tests are used for determining whether the mean in a population is different than a hypothesized value
 
-Assumptions for Z and T tests
+*Assumptions for Z and T tests*
 
 Large sample size or data are approximately normal if sample size is small
 
